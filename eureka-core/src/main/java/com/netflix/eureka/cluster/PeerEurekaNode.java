@@ -344,6 +344,9 @@ public class PeerEurekaNode {
     }
 
     /**
+     * <pre>
+     * 关闭所有使用到此副本的资源
+     * </pre>
      * Shuts down all resources used for peer replication.
      */
     public void shutDown() {

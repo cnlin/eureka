@@ -28,6 +28,17 @@ import org.slf4j.LoggerFactory;
 import static com.netflix.eureka.Names.METRIC_REPLICATION_PREFIX;
 
 /**
+ * <pre>
+ * 基于拉取的操作，对象的内部线程从 client 接收任务，并分发给执行线程。
+ * 执行线程在可用的时候，要求有 一个或多个 item。这保证了数据总是能够被及时处理。
+ *
+ * <h3>任务标识</h3>
+ * 每一个传递进来处理的任务都持有 ID，用来移除重复任务（用新的代替旧的）
+ *
+ * <h3>反处理</h3>
+ * 如果执行线程处理数据失败，而该失败是无法序列化的，则执行线程会将其重放到 AcceptorExecutor 中。
+ * 数据会被合并到当前的工作负载，可能后续新版本任务进来后被替换。
+ * </pre>
  * An active object with an internal thread accepting tasks from clients, and dispatching them to
  * workers in a pull based manner. Workers explicitly request an item or a batch of items whenever they are
  * available. This guarantees that data to be processed are always up to date, and no stale data processing is done.

@@ -85,6 +85,7 @@ public class PeerEurekaNodes {
                 }
         );
         try {
+            // 初始执行，然后定义为 Task
             updatePeerEurekaNodes(resolvePeerUrls());
             Runnable peersUpdateTask = new Runnable() {
                 @Override
@@ -97,6 +98,7 @@ public class PeerEurekaNodes {
 
                 }
             };
+            // 线程池定期执行 远程节点更新任务
             taskExecutor.scheduleWithFixedDelay(
                     peersUpdateTask,
                     serverConfig.getPeerEurekaNodesUpdateIntervalMs(),
@@ -146,6 +148,9 @@ public class PeerEurekaNodes {
     }
 
     /**
+     * <pre>
+     * 通过 副本 的 新 URL 集合，销毁不再可用的 副本，然后创建新的 副本 节点
+     * </pre>
      * Given new set of replica URLs, destroy {@link PeerEurekaNode}s no longer available, and
      * create new ones.
      *
@@ -158,9 +163,9 @@ public class PeerEurekaNodes {
         }
 
         Set<String> toShutdown = new HashSet<>(peerEurekaNodeUrls);
-        toShutdown.removeAll(newPeerUrls);
+        toShutdown.removeAll(newPeerUrls);      // 剩余旧副本中，非新副本 的 URL，需要删除
         Set<String> toAdd = new HashSet<>(newPeerUrls);
-        toAdd.removeAll(peerEurekaNodeUrls);
+        toAdd.removeAll(peerEurekaNodeUrls);    // 剩余新副本中，非旧副本 的 URL，需要新增
 
         if (toShutdown.isEmpty() && toAdd.isEmpty()) { // No change
             return;
@@ -196,11 +201,13 @@ public class PeerEurekaNodes {
     }
 
     protected PeerEurekaNode createPeerEurekaNode(String peerEurekaNodeUrl) {
+        // 通过 peerUrl，创建该 URL 的副本客户端
         HttpReplicationClient replicationClient = JerseyReplicationClient.createReplicationClient(serverConfig, serverCodecs, peerEurekaNodeUrl);
         String targetHost = hostFromUrl(peerEurekaNodeUrl);
         if (targetHost == null) {
             targetHost = "host";
         }
+        // 创建副本节点
         return new PeerEurekaNode(registry, targetHost, peerEurekaNodeUrl, replicationClient, serverConfig);
     }
 

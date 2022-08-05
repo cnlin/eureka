@@ -6,6 +6,7 @@ import com.netflix.discovery.converters.wrappers.EncoderWrapper;
 import com.netflix.eureka.registry.Key;
 
 /**
+ * 服务端编解码工具
  * @author David Liu
  */
 public interface ServerCodecs {
